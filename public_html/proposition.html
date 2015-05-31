@@ -1,0 +1,39 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="css/kube.min.css" />
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
+    <script src="js/kube.min.js"></script>
+</head>
+<body>
+	
+	<div class="units-row">
+		<h1>Rechercher des propostions déjà soumises</h1>
+		<form method="post" action="proposition-list.php" class="forms">
+			<label><input type="text" name="recherche" placeholder="Nom de proposition"/></label>
+			<label>
+				<select name="type_recherche" size="1">
+					<option value="nom_prop">Recherche par nom</option>
+					<option value="periode">Recherche par période</option>
+					<option value="appel">Recherche par appel d'offres</option>
+					<option value="organisme">Recherche par organisme</option>
+				</select>
+			</label>
+			<input class="btn-blue width-50" type="submit" value="Rechercher"/></br>
+		</form>
+	</div>
+
+	<div class="units-row">
+		<h1>Insérer une nouvelle proposition</h1>
+		<form method="post" action="" class="forms">
+			<label><input type="text" name="sujet" placeholder="Nom de proposition"/></label>
+			<label><TEXTAREA name="description" rows=3 cols=50 placeholder="Description" ></TEXTAREA></label>
+			<input class="btn-blue width-50" type="submit" value="Insérer"/></br>
+		</form>
+	</div>
+	
+</body>
+</html>
