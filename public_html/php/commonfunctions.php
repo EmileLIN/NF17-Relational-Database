@@ -35,15 +35,21 @@ Class commonfunctions
 		commonfunctions::HTML_header();
 		?>
 			<style>
-				.accordion-panel{
+				.panel{
+					display:none;
+				}
+				.panel1{
+					display:none;
+				}
+				.panel2{
 					display:none;
 				}
 			</style>
 			<script type="text/javascript">
 						$(document).ready(function(){
-							$('.accordion-title').click(function(){
-								$(this).siblings().slideToggle("slow");
-								var obj = $(this).siblings().find('p'); 
+							$('.view').click(function(){
+								$(this).children("div.panel").slideToggle("slow");
+								var obj = $(this).children('div.panel').find('p'); 
 								
 								$.ajax({
 									type: 'GET',
@@ -55,6 +61,86 @@ Class commonfunctions
 									}
 								});
 							});
+							
+							$('.update').click(function(){
+									$(this).siblings("div").slideToggle("slow"); 
+							});
+							
+							$('.update_depense').click(function(){
+									$(this).siblings("div.panel1").slideToggle("slow");
+							});
+							
+							$('.update_member').click(function(){
+									$(this).siblings("div.panel2").slideToggle("slow");
+							});
+							
+							
+							$('.valid_member').click(function(){
+									var nom = $(this).siblings("input.member_nom");
+									var prenom = $(this).siblings("input.member_prenom");
+									var mail = $(this).siblings("input.member_mail");
+									var fonction = $(this).siblings("input.member_fonction");
+									var proj_name = $(this).parentsUntil('tbody').children('td.name').find('p'); 
+									var proj_datedebut = $(this).parentsUntil('tbody').children('td.datedebut');
+									
+									if(nom.val() == '')
+									{
+										nom.val("null");
+									}
+									
+									if(prenom.val() == '')
+									{
+										prenom.val("null");
+									}
+									
+									if(mail.val() == '')
+									{
+										mail.val("null");
+									}
+									
+									if(fonction.val() == '')
+									{
+										fonction.val("null");
+									}
+									
+									
+									$.ajax({
+										type: 'GET',
+										url: 'project-update-member.php',
+										data: 'member='+nom.val()+"/"+prenom.val()+"/"+mail.val()+"/"+fonction.val()+"/"+proj_name.html()+"/"+proj_datedebut.html(),
+										success: function(msg){
+											window.alert(msg);
+										}
+									});	
+							});
+							
+							$('.valid_depense').click(function(){
+									var depense_id = $(this).siblings("input.depense_id");
+									var depense_date = $(this).siblings("input.depense_date");
+									var montant = $(this).siblings("input.depense_montant");
+									var depense_type = $(this).siblings("input.depense_type");
+									var demandeur = $(this).siblings("input.demandeur");
+									var validateur = $(this).siblings("input.valideur");
+									var proj_name = $(this).parentsUntil('tbody').children('td.name').find('p'); 
+									var proj_datedebut = $(this).parentsUntil('tbody').children('td.datedebut');
+									
+									if(depense_type.val() == '')
+									{
+										depense_type.val("null");
+									}
+								
+									
+									$.ajax({
+										type: 'GET',
+										url: 'project-update-depense.php',
+										data: 'depense='+depense_id.val()+"/"+depense_date.val()+"/"+montant.val()+"/"+depense_type.val()+"/"+demandeur.val()+"/"+validateur.val()+"/"+proj_name.html()+"/"+proj_datedebut.html(),
+										success: function(msg){
+											window.alert(msg);
+										}
+									});	
+									
+							});
+							
 						});
 			</script>
 			
@@ -84,15 +170,47 @@ Class commonfunctions
             <td>
             	<ul class="blocks-3">
     						<li>
-    							<div id="<?php echo "accordion".$count;?>">
-    								<div id="<?php echo "title".$count;?>" class="accordion-title" >View</div>
-    								<div id="<?php echo "panel".$count;?>" class="accordion-panel">
+    							<div class="view">
+    								<div id="<?php echo "title".$count;?>" class="btn-blue" >   View</div>
+    								<div id="<?php echo "panel".$count;?>" class="panel">
     									<p id="<?php echo "result".$count;?>"></p>
     								</div>
 									</div>
 								</li>
-    						<li><a id="update1" href="#" class="btn">Update</a></li>
-   			 				<li><a href="#" class="btn">Delete</a></li>
+    						<li>
+    							<div class="update">
+    								<div id="<?php echo "update1".$count;?>" class="btn-green">   Update</div>
+    							</div>
+    							<div id="<?php echo "update_panel".$count;?>" class="panel">
+										 <div class="update_depense">
+	  										<label class="btn">Ajoute_Membre</label>
+									   </div>
+									   <div class="panel1">
+	  											<input name="member_nom" class="member_nom" placeholder="membre nom" width="50px"/>
+	  											<input name="member_prenom" class="member_prenom" placeholder="membre prenom" width="50px"/>
+	  											<input name="member_mail" class="member_mail" placeholder="mail" width="50px"/>
+	  											<input name="member_fonction" class="member_fonction" placeholder="fonction" width="50px"/>
+	  											<button class="valid_member">Valider</button>
+	  								 </div>
+									   <div class="update_member">
+	  										<label class="btn">Ajoute_Depense</label> 
+										 </div>
+										 <div class="panel2">
+	  											<input name="depense_id" class="depense_id" placeholder="depense_id" />
+	  											<input name="depense_date" class="depense_date" placeholder="depense_date" />
+	  											<input name="depense_montant" class="depense_montant" placeholder="depense_montant" />
+	  											<input name="depense_type" class="depense_type" placeholder="type" />
+	  											<input name="demandeur" class="demandeur" placeholder="demandeur" />
+	  											<input name="valideur" class="valideur" placeholder="valideur" />
+	  											<button class="valid_depense">Valider</button>
+	  								 </div>
+    							</div>
+    						</li>
+   			 				<li>
+   			 					<div class="delete">
+   			 						<div class="btn-red">   Delete</div>
+   			 					</div>
+   			 				</li>
 							</ul>
             </td>
         	</tr>     			
