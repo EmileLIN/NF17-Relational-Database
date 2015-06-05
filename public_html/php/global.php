@@ -12,4 +12,7 @@
 	$_SESSION["MonthMap"]["Octobre"]= "10";
 	$_SESSION["MonthMap"]["Nomvembre"]= "11";
 	$_SESSION["MonthMap"]["Decembre"]= "12";
+	
+	
+
 ?>

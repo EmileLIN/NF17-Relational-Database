@@ -10,12 +10,58 @@ Class commonfunctions
 		return $date;	
 	}
 	
+	public static function getPropositionIdBySujet($vConn,$sujet)
+	{
+		$query = "SELECT numero ".
+						 "FROM proposition ".
+						 "WHERE sujet = '".$sujet."'";
+						 
+		$vQuery=pg_query($vConn, $query);
+		
+		while($vResult=pg_fetch_array($vQuery))
+		{
+			return $vResult[0];	
+		}
+		return NULL;
+	}
+	
+	public static function getPropositionSujetById($vConn,$numero)
+	{
+		$query = "SELECT sujet ".
+						 "FROM proposition ".
+						 "WHERE numero = '".$numero."'";
+						 
+		$vQuery=pg_query($vConn, $query);
+		
+		while($vResult=pg_fetch_array($vQuery))
+		{
+			return $vResult[0];	
+		}
+		return NULL;
+	}
+	
+	public static function getPropositionBujet($vConn,$numero)
+	{
+		$query = "SELECT SUM(lb.montant) AS somme ".
+						 "FROM proposition p, lignebudgetaire lb ".
+						 "WHERE p.numero = lb.numerob AND p.numero = ".$numero;
+						 
+		$vQuery=pg_query($vConn, $query);	
+		while($vResult=pg_fetch_array($vQuery))
+		{
+			return $vResult[0];	
+		}
+		return null;		 	
+		
+	}
+	
+	
 	
 	public static function HTML_header()
 	{
 		?>
 			<head>
-   		 <title>Kube Web Framework</title>
+   		 <title>Labo de recherche</title>
 
     	<meta charset="utf-8" />
     	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -141,6 +187,21 @@ Class commonfunctions
 									
 							});
 							
+							$('.delete').click(function()
+							{
+								
+								var proj_name = $(this).parentsUntil('tbody').children('td.name').find('p');
+								var proj_datedebut = $(this).parentsUntil('tbody').children('td.datedebut'); 
+								
+								$.ajax({
+										type: 'GET',
+										url: 'project-delete.php',
+										data: 'proj='+proj_name.html()+'/'+proj_datedebut.html(),
+										success: function(msg){
+											window.alert(msg);
+										}
+									});	
+							});
 						});
 			</script>
 			
@@ -152,6 +213,8 @@ Class commonfunctions
            	 <th>Date de debut</th>
            	 <th>Date de fin</th>
            	 <th>Proposition</th>
+           	 <th>Budget Restant</th>
+           	 <th>Terminer</th>
            	 <th>Options</th>
         		</tr>
     			</thead>
@@ -159,14 +222,44 @@ Class commonfunctions
     <?php
 	}
 	
-	public static function projectLister($data,$count)
+	public static function projectLister($data,$count,$vConn)
 	{ 
     		?>
         	<tr id="<?php echo $count;?>">
             <td class="name"><p id="<?php echo "proj_name".$count; ?>"><?php echo $data[0];?></p></td>
             <td class="datedebut"><?php echo $data[1];?></td>
             <td><?php echo $data[2];?></td>
-            <td><?php echo $data[3];?></td>
+            <td><?php 
+            	if($data[3]!=NULL)
+            	{
+            		echo commonfunctions::getPropositionSujetById($vConn,$data[3]);
+            	}
+            	else
+            	{
+            		echo "Non Propostion Associe";	
+            	}
+            ?></td>
+            <td><?php
+            		$montant = commonfunctions::getPropositionBujet($vConn,$data[3]); 
+            		if($montant == null)
+            		{
+            			echo "0 EUROS";
+            		}
+            		else
+            		{
+            			echo $montant." EUROS";
+            		}
+            		?></td>
+            <td><?php 
+            	if($data[5] == TRUE)
+            	{
+            			echo "Termine";
+            	}
+            	else
+            	{
+            		  echo "En Cours";	
+            	}
+            ?></td>
             <td>
             	<ul class="blocks-3">
     						<li>
@@ -177,6 +270,10 @@ Class commonfunctions
     								</div>
 									</div>
 								</li>
+								<?php
+								if($data[5] != TRUE)
+								{
+								?>
     						<li>
     							<div class="update">
     								<div id="<?php echo "update1".$count;?>" class="btn-green">   Update</div>
@@ -208,9 +305,12 @@ Class commonfunctions
     						</li>
    			 				<li>
    			 					<div class="delete">
-   			 						<div class="btn-red">   Delete</div>
+   			 						<div id="<?php echo "delete-title".$count;?>" class="btn-red" >Terminer</div>
    			 					</div>
    			 				</li>
+   			 				<?php
+   			 			}
+   			 				?>
 							</ul>
             </td>
         	</tr>     			

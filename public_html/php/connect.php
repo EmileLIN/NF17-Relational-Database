@@ -1,10 +1,10 @@
 <?php
 	function fConnect(){
-		$vHost="tuxa.sme.utc";
-		$vPort="5432";
-		$vDbname="dbnf17p025";
-		$vUser="nf17p025";
-		$vPassword="cZMSg0wc";
+		$vHost="xxxxxxxxxxx";
+		$vPort="xxxx";
+		$vDbname="xxxxxxxxxxx";
+		$vUser="xxxxxxxxx";
+		$vPassword="xxxxxxxx";
 		$vConn = pg_connect("host=$vHost port=$vPort dbname=$vDbname user=$vUser password=$vPassword");
 		if($vConn != FALSE)
 		{

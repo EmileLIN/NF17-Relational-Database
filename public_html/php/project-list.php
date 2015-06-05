@@ -135,7 +135,10 @@
 				{
 					$query = $query." AND ";
 				}
-				$query = $query."proposition = ".$Data["projectProposition"];
+				
+				$ProId = commonfunctions::getPropositionIdBySujet($vConn,$Data["projectProposition"]);
+				
+				$query = $query."proposition = ".$ProId;
 				$count++;
 		}
 		
@@ -168,8 +171,10 @@
 		commonfunctions::projectHeader();
 		while($vResult=pg_fetch_array($vQuery))
 		{
-			commonfunctions::projectLister($vResult,$count);
+			
+			commonfunctions::projectLister($vResult,$count,$vConn);
 			$count ++;
+			
 		}
 			commonfunctions::projectFooter();
 		
