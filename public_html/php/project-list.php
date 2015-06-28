@@ -95,7 +95,7 @@
 		
 		if($beginday != NULL && $beginmonth != NULL && $beginyear != NULL)
 		{
-			$Data["begindate"] = commonfunctions::dateFormer($beginday,$beginmonth,$beginyear,"/");	
+			$Data["begindate"] = commonfunctions::dateFormer($beginday,$beginmonth,$beginyear,"-");	
 		}
 		else
 		{
@@ -104,7 +104,7 @@
 		
 		if($endday != NULL && $endmonth != NULL && $endyear != NULL)
 		{
-			$Data["enddate"] = commonfunctions::dateFormer($endday,$endmonth,$endyear,"/");	
+			$Data["enddate"] = commonfunctions::dateFormer($endday,$endmonth,$endyear,"-");	
 		}
 		else
 		{
@@ -118,6 +118,7 @@
 		$query = "";
 		$query = $query."SELECT * FROM projet WHERE ";
 		$count = 0;
+		$cond  = FALSE;
 		
 		if($Data["projectName"] != NULL)
 		{
@@ -126,6 +127,7 @@
 					$query = $query." AND ";
 				}
 				$query = $query."nom = '".$Data["projectName"]."'";
+				$cond  = TRUE;
 				$count++;
 		}
 		
@@ -139,6 +141,7 @@
 				$ProId = commonfunctions::getPropositionIdBySujet($vConn,$Data["projectProposition"]);
 				
 				$query = $query."proposition = ".$ProId;
+				$cond  = TRUE;
 				$count++;
 		}
 		
@@ -150,6 +153,7 @@
 				}
 				$query = $query."datedebut = '".$Data["begindate"]."'";
 				$count++;
+				$cond  = TRUE;
 		}
 		
 		if($Data["enddate"] != NULL)
@@ -160,12 +164,16 @@
 				}
 				$query = $query."datefin = '".$Data["enddate"]."'";
 				$count++;
+				$cond  = TRUE;
 		}
 		
 		$query = $query.";";
 		//echo "query is ".$query."<br>";
 	
-		$vQuery=pg_query($vConn, $query);
+	  if($cond == TRUE)
+	  {
+			$vQuery=pg_query($vConn, $query);
+		
 		
 		$count = 1;
 		commonfunctions::projectHeader();
@@ -176,8 +184,20 @@
 			$count ++;
 			
 		}
+		if($count == 1)
+	  {
+	 	 ?>
+	 	    <tr>Non resultats</tr>
+	 	  </tbody>
+	 	</table>
+	 	 <?php
+	  }
 			commonfunctions::projectFooter();
-		
+		}
+		else
+		{
+		   echo "Aucune critere chosis";	
+		}
 		
 		
 		
