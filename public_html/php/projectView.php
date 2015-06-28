@@ -1,6 +1,7 @@
 <?php
 
 	include "connect.php";
+	include "commonfunctions.php";
 	$vConn = fConnect();
 	
 	function getMemberName($vConn,$mail)
@@ -16,6 +17,25 @@
 			$name = $vResult["prenom"]." ".$vResult["nom"];
 		}
 		return $name;
+	}
+	
+	function getPropositionId($vConn,$pnom,$pdate)
+	{
+	      $query = "SELECT proposition ".
+						 "FROM projet ".
+						 "WHERE nom = '".$pnom."' AND datedebut = '".$pdate."'";
+						 
+	      $vQuery=pg_query($vConn, $query);
+	    
+	      while($vResult=pg_fetch_array($vQuery,null,PGSQL_ASSOC))
+	      {
+			return $vResult["proposition"];
+			
+	      }
+	     
+	      return NULL;
+	      
+	
 	}
 	
 	if($_GET['proj'] != '')
@@ -72,6 +92,23 @@
 		
 		//Budget du projet
 		echo "Budget du Projet:<br>";
+		$proid = getPropositionId($vConn,$projName,$projDate);
+		if($proid != NULL)
+		{
+		  $budjet = commonfunctions::getPropositionBujet($vConn,$proid);
+		}
+		else
+		{
+		  $budjet = NULL;
+		}
+		if($budjet != NULL)
+		{
+		  echo $budjet." EUROS<br>";
+		}
+		else
+		{
+		  echo "0 EUROS<br>";
+		}
 		echo "<br>";
 		
 		//Depense en Total
@@ -83,11 +120,21 @@
 		$vQuery=pg_query($vConn, $query_depense_total);
 		while($vResult=pg_fetch_array($vQuery,null,PGSQL_ASSOC))
 		{
-				echo "Depense En Total: ".$vResult["total"]."euros<br>";
+				$depense = $vResult["total"];
+				echo "Depense En Total: ".$depense."euros<br>";
 		}
 		echo "<br>";
 		
 		echo "L'argent reste:<br>";
+		$montant = $budjet - $depense;
+		if($montant != NULL)
+		{
+		  echo $montant." EUROS<br>";
+		}
+		else
+		{
+		  echo "0 EUROS<br>";
+		}
 		echo "<br>";
 	}
 	else
