@@ -21,9 +21,10 @@
 		{
 			#Then, invisble the project
 			$query_projet =  "Update projet ".
-											 "SET fini = TRUE ".
+											 "SET termine = TRUE ".
 											 "WHERE nom = '".$projName."' AND datedebut = '".$projDatedebut."'";
 			
+			//echo $query_projet;
 			$vQuery=pg_query($vConn, $query_projet);
 			
 			if($vQuery != FALSE )
