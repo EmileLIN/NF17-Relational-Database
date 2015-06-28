@@ -6,16 +6,89 @@ Class commonfunctions
 	
 	public static function dateFormer($day,$month,$year,$separator)
 	{
-		$date = $day.$separator.$_SESSION["MonthMap"][$month].$separator.$year;
+		$date = $year.$separator.$_SESSION["MonthMap"][$month].$separator.$day;
 		return $date;	
+	}
+	
+	public static function isMemberinAProject($vConn,$mail)
+	{
+		if($mail != NULL)
+		{
+			$query = "SELECT COUNT(*) AS num ".
+							 "FROM membre ".
+							 "WHERE mail = '".$mail."'";
+							
+			$vQuery=pg_query($vConn, $query);
+		
+			
+			while($vResult=pg_fetch_array($vQuery,null,PGSQL_ASSOC))
+			{
+					$count = $vResult["num"];	
+					echo "count is ".$count;	
+			}
+			
+			if($count == 1)
+			{
+				return TRUE;
+			}
+			else
+			{
+				return FALSE;
+			}
+				
+		}
+		else
+		{
+			 return NULL;	
+		}
+					
+	}
+	
+	public static function isMemberTheChef($vConn,$mail)
+	{
+			if($mail != NULL)
+			{
+				$query = "SELECT * AS num ".
+							 	 "FROM membre ".
+							 	 "WHERE mail = '".$mail."'";
+							 	 
+				$count = 0;
+				$vQuery=pg_query($vConn, $query);
+		
+			
+				while($vResult=pg_fetch_array($vQuery,null,PGSQL_ASSOC))
+				{
+					$fonction = $vResult["fonction"];	
+					$count ++;	
+				}
+				if($count == 0)
+				{
+					return FALSE;
+				}
+				
+				if($fonction != 'chefdeprojet')
+				{
+					return TRUE;
+				}
+				else
+				{
+					return FALSE;
+				}
+				
+			}
+			else
+			{
+				return NULL;
+			}
 	}
 	
 	public static function getPropositionIdBySujet($vConn,$sujet)
 	{
 		$query = "SELECT numero ".
 						 "FROM proposition ".
-						 "WHERE sujet = '".$sujet."'";
-						 
+						 "WHERE description LIKE '%".$sujet."%'";
+		
+		#echo $query;				 
 		$vQuery=pg_query($vConn, $query);
 		
 		while($vResult=pg_fetch_array($vQuery))
@@ -27,9 +100,9 @@ Class commonfunctions
 	
 	public static function getPropositionSujetById($vConn,$numero)
 	{
-		$query = "SELECT sujet ".
+		$query = "SELECT description ".
 						 "FROM proposition ".
-						 "WHERE numero = '".$numero."'";
+						 "WHERE numero = ".$numero;
 						 
 		$vQuery=pg_query($vConn, $query);
 		
@@ -42,17 +115,43 @@ Class commonfunctions
 	
 	public static function getPropositionBujet($vConn,$numero)
 	{
-		$query = "SELECT SUM(lb.montant) AS somme ".
+		if($numero != NULL && $numero != '')
+		{
+			$query = "SELECT SUM(lb.montant) AS somme ".
 						 "FROM proposition p, lignebudgetaire lb ".
 						 "WHERE p.numero = lb.numerob AND p.numero = ".$numero;
 						 
-		$vQuery=pg_query($vConn, $query);	
-		while($vResult=pg_fetch_array($vQuery))
-		{
-			return $vResult[0];	
+			$vQuery=pg_query($vConn, $query);	
+			while($vResult=pg_fetch_array($vQuery))
+			{
+				return $vResult[0];	
+			}
 		}
-		return null;		 	
-		
+		else
+		{
+			return "Non Budget";		 	
+		}
+	}
+	
+	public static function getProjetDepense($vConn,$projet,$datedebut)
+	{
+		if($projet != NULL && $projet != '')
+		{
+			$query = "SELECT SUM(d.montant) AS somme ".
+						 "FROM projet p, depense d ".
+						 "WHERE p.nom = d.nomp AND p.datedebut = d.datep ".
+						 "AND p.nom = '".$projet."' AND p.datedebut = '".$datedebut."'";
+						 
+			$vQuery=pg_query($vConn, $query);	
+			while($vResult=pg_fetch_array($vQuery))
+			{
+				return $vResult[0];	
+			}
+		}
+		else
+		{
+			return "Non Depense";		 	
+		}
 	}
 	
 	
@@ -66,11 +165,11 @@ Class commonfunctions
     	<meta charset="utf-8" />
     	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    	<link rel="stylesheet" href="../css/kube.min.css" />
+    	<link rel="stylesheet" href="../HTML/css/kube.min.css" />
 
 			<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>-->
    		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
-    	<script src="../js/kube.min.js"></script>
+    	<script src="../HTML/js/kube.min.js"></script>
 			
 			</head>
 		<?php	
@@ -213,7 +312,7 @@ Class commonfunctions
            	 <th>Date de debut</th>
            	 <th>Date de fin</th>
            	 <th>Proposition</th>
-           	 <th>Budget Restant</th>
+           	 <th>L'argent Restant</th>
            	 <th>Terminer</th>
            	 <th>Options</th>
         		</tr>
@@ -240,8 +339,10 @@ Class commonfunctions
             	}
             ?></td>
             <td><?php
-            		$montant = commonfunctions::getPropositionBujet($vConn,$data[3]); 
-            		if($montant == null)
+            		$budjet = commonfunctions::getPropositionBujet($vConn,$data[3]);
+            		$depense = commonfunctions::getProjetDepense($vConn,$data[0],$data[1]);
+            		$montant = $budjet - $depense;
+            		if($budjet == null)
             		{
             			echo "0 EUROS";
             		}
@@ -289,7 +390,7 @@ Class commonfunctions
 	  											<input name="member_fonction" class="member_fonction" placeholder="fonction" width="50px"/>
 	  											<button class="valid_member">Valider</button>
 	  								 </div>
-									   <div class="update_member">
+									  <div class="update_member">
 	  										<label class="btn">Ajoute_Depense</label> 
 										 </div>
 										 <div class="panel2">
