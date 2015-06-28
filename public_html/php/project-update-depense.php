@@ -15,12 +15,44 @@
 			$proj_name = $tab[6];
 			$proj_datedebut = $tab[7];
 			
+			$valide = TRUE;
+			
+			#demandeur should be in this projet
+			if($demandeur != NULL && $demandeur != '')
+			{
+				if(commonfunctions::isMemberinAProject($vConn,$demandeur) == FALSE)
+				{
+					$valide = FALSE;
+					echo "Warning: Le demandeur n'est un membre de ce projet";
+				}
+			}
+			else
+			{
+				echo "Warning: Le demandeur ne peut pas etre null";
+				$valide =FALSE;
+			}
+			
+			if($validateur != NULL && $validateur != '')
+			{
+				if(commonfunctions::isMemberTheChef($vConn,$validateur) == FALSE)
+				{
+					$valide = FALSE;
+					echo "Warning: Le validateur n'est un chefdeprojet ou il n'est pas un membre de ce projet";
+				}
+			}
+			else
+			{
+				echo "Warning: Le validateur ne peut pas etre null";
+			}
+			
+			
+			
 			if($type == 'null')
 			{
 				$type = 'NULL';
 			}
 			
-			if($id != '' && $demandeur != '' && $validateur != '' && $proj_name != '' && $proj_datedebut != '')
+			if($id != '' && $demandeur != '' && $validateur != '' && $proj_name != '' && $proj_datedebut != '' && $valide == TRUE)
 			{
 				$query_depense = "INSERT INTO depense ".
 												 "VALUES(".$id.",'".$date."',".$montant.
@@ -33,16 +65,16 @@
 				
 				if($result != FALSE)
 				{
-					echo "Insere reussi";
+					echo "Insertion reussie";
 				}
 				else
 				{
-					echo "Insere echoue";
+					echo "Insertion echoue";
 				}
 			}
 			else
 			{
-				echo "ERROR: Quequel que champs sont null";	
+				echo "ERROR: Reremplir la formulaire,svp";	
 			}
 				
 			
